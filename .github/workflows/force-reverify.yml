@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install deps
-        run: pip install requests
+        run: pip install -r requirements.txt
       - name: Run script
         env:
           DISCOURSE_BASE_URL: ${{ secrets.DISCOURSE_BASE_URL }}   # e.g. https://forum.example.com
