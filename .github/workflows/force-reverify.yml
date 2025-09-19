@@ -1,0 +1,34 @@
+name: Force reverify (Discourse)
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (true/false)"
+        required: true
+        default: "true"
+  schedule:
+    - cron: "15 3 * * 0" # Sundays 03:15 UTC
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: pip install requests
+      - name: Run script
+        env:
+          DISCOURSE_BASE_URL: ${{ secrets.DISCOURSE_BASE_URL }}   # e.g. https://forum.example.com
+          DISCOURSE_API_KEY:  ${{ secrets.DISCOURSE_API_KEY }}    # global admin API key
+          DISCOURSE_API_USER: ${{ secrets.DISCOURSE_API_USER }}   # e.g. system or your admin username
+          DRY_RUN:            ${{ github.event.inputs.dry_run || 'true' }}
+          USER_FILTER:        "active"
+          LAST_SEEN_BEFORE_DAYS: "365"
+          INCLUDE_TL:         "0,1,2"   # only lower TLs
+          EXCLUDE_STAFF:      "true"
+          RATE_LIMIT_SLEEP:   "0.25"
+        run: python force_reverify.py
